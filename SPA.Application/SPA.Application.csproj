@@ -7,13 +7,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Interfaces\" />
-      <Folder Include="Services\" />
       <Folder Include="Validators\" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\SPA.Domain\SPA.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Mapster" Version="7.4.0" />
     </ItemGroup>
 
 </Project>
