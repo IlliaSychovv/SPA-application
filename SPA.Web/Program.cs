@@ -4,6 +4,7 @@ using SPA.Application.Interfaces.Service;
 using SPA.Application.Services;
 using SPA.Infrastructure.Data;
 using SPA.Infrastructure.Repositories;
+using SPA.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,9 @@ builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IImportService, ImportService>();
+builder.Services.AddScoped<IFileRepository, FileRepository>();
+builder.Services.AddScoped<IFileProcessingService, FileProcessingService>();
 
 var app = builder.Build();
 

@@ -15,5 +15,6 @@ public enum FileType
 {
     Jpg,
     Gif,
-    Png
+    Png,
+    Txt
 }
