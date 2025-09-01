@@ -23,12 +23,13 @@ public class CommentService : ICommentService
 
     public async Task<CommentDto> CreateComment(CreateCommentDto dto)
     {
-        var user = await _authRepository.GetByIdAsync(dto.UserId);
+        var user = await _authRepository.GetByEmailAsync(dto.Email);
         
         var comment = dto.Adapt<Comment>();
         comment.Id = Guid.NewGuid();
         comment.User = user;
         comment.UserId = user.Id;
+        comment.Created = DateTime.Now;
         
         await _commentRepository.AddAsync(comment);
         return dto.Adapt<CommentDto>();
@@ -70,8 +71,8 @@ public class CommentService : ICommentService
                 await _fileProcessingService.ProcessAndSaveFileAsync(fileData, reply.Id);
             }
         }
-        
-        return reply.Adapt<CommentDto>();
+
+        return MapToCommentDto(reply); 
     }
     
     private CommentDto MapToCommentDto(Comment comment)

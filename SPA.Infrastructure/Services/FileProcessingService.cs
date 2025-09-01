@@ -42,6 +42,7 @@ public class FileProcessingService : IFileProcessingService
             ".jpg" or ".jpeg" => FileType.Jpg,
             ".gif" => FileType.Gif,
             ".png" => FileType.Png,
+            ".txt" => FileType.Txt,
             _ => throw new ArgumentException($"Unsupported file type: {extension}")
         };
     }

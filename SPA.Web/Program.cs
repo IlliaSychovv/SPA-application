@@ -22,6 +22,8 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IImportService, ImportService>();
 builder.Services.AddScoped<IFileRepository, FileRepository>();
 builder.Services.AddScoped<IFileProcessingService, FileProcessingService>();
+builder.Services.AddScoped<ICaptchaService, CaptchaService>();
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 
