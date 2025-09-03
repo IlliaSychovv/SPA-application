@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using SPA.Application.Interfaces.Service;
+using System.Text;
 
 namespace SPA.Infrastructure.Services;
 
@@ -72,7 +73,7 @@ public class ImportService : IImportService
             throw new InvalidOperationException("The file exceeds the allowed size");
         }
 
-        using var reader = new StreamReader(fileStream);
+        using var reader = new StreamReader(fileStream, Encoding.GetEncoding(1251));
         var content = await reader.ReadToEndAsync();
         content = SanitizeText(content);
 

@@ -5,6 +5,7 @@ using SPA.Application.DTO.Captcha;
 using SPA.Application.DTO.Comments;
 using SPA.Application.DTO.Files;
 using SPA.Application.Interfaces.Service;
+using SPAApp.Extensions;
 
 namespace SPAApp.Controllers;
 

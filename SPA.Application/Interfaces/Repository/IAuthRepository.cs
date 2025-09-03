@@ -4,7 +4,7 @@ namespace SPA.Application.Interfaces.Repository;
 
 public interface IAuthRepository
 {
-    Task RegisterUserAsync(User user);
-    Task<User?> GetByIdAsync(Guid id);
+    Task RegisterUserAsync(User user); 
     Task<User?> GetByEmailAsync(string email);
+    Task<User?> GetByUserNameAsync(string name);
 }

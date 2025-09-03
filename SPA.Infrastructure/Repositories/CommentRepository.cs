@@ -25,8 +25,17 @@ public class CommentRepository : ICommentRepository
     {
         IQueryable<Comment> query = _context.Comments
             .Include(x => x.User)
+            .Include(x => x.Files)
             .Include(x => x.Replies)
-            .ThenInclude(r => r.User)
+                .ThenInclude(r => r.User)
+            .Include(x => x.Replies)
+                .ThenInclude(r => r.Files)
+            .Include(x => x.Replies)
+                .ThenInclude(r => r.Replies) 
+                .ThenInclude(rr => rr.User)
+            .Include(x => x.Replies)
+                .ThenInclude(r => r.Replies)
+                .ThenInclude(rr => rr.Files)
             .Where(c => c.ParentId == null);
 
         if(!string.IsNullOrWhiteSpace(filterByUserName))
@@ -43,10 +52,12 @@ public class CommentRepository : ICommentRepository
             _ => query.OrderByDescending(c => c.Created)
         };
     
-        return await query
+        var result = await query
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+            
+        return result;
     }
 
     public async Task<int> GetCountAsync(string? filterByName = null, DateTime? filterByDate = null)

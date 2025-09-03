@@ -24,6 +24,17 @@ public class CommentService : ICommentService
     public async Task<CommentDto> CreateComment(CreateCommentDto dto)
     {
         var user = await _authRepository.GetByEmailAsync(dto.Email);
+        if (user == null)
+        {
+            user = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = dto.Name,
+                Email = dto.Email,
+                Homepage = dto.HomePage
+            };
+            await _authRepository.RegisterUserAsync(user);
+        }
         
         var comment = dto.Adapt<Comment>();
         comment.Id = Guid.NewGuid();
@@ -32,7 +43,7 @@ public class CommentService : ICommentService
         comment.Created = DateTime.Now;
         
         await _commentRepository.AddAsync(comment);
-        return dto.Adapt<CommentDto>();
+        return MapToCommentDto(comment);
     }
     
     public async Task<PagedResponse<CommentDto>> GetAll(int pageNumber, int pageSize, string? sortBy = null,
@@ -52,15 +63,16 @@ public class CommentService : ICommentService
         };
     }
 
-    public async Task<CommentDto> AddReply(Guid parentId, CommentReplyDto dto, List<FileStreamData> files = null)
+    public async Task<CommentDto> AddReply(Guid parentId, CommentReplyDto dto, List<FileStreamData>? files = null)
     {
-        var user = await _authRepository.GetByIdAsync(dto.UserId);
+        var user = await _authRepository.GetByUserNameAsync(dto.Name);
         
         var reply = dto.Adapt<Comment>();
         reply.Id = Guid.NewGuid();
         reply.User = user;
         reply.UserId = user.Id;
         reply.ParentId = parentId;
+        reply.Created = DateTime.Now;
         
         await _commentRepository.AddAsync(reply);
         
@@ -85,7 +97,29 @@ public class CommentService : ICommentService
             Name = comment.User.Name,
             Created = comment.Created,
             ParentId = comment.ParentId,
-            Replies = comment.Replies.Select(MapToCommentDto).ToList()
+            Replies = comment.Replies.Select(MapToCommentDto).ToList(),
+            Files = comment.Files.Select(f => new FileDto
+            {
+                Id = f.Id,
+                FileName = Path.GetFileName(f.Path),
+                Path = f.Path,
+                Type = f.Type.ToString(),
+                Size = f.Size,
+                SizeFormatted = FormatFileSize(f.Size)
+            }).ToList()
         };
+    }
+    
+    private string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
     }
 }

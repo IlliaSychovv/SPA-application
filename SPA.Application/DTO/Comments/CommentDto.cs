@@ -1,3 +1,5 @@
+using SPA.Application.DTO.Files;
+
 namespace SPA.Application.DTO.Comments;
 
 public record CommentDto
@@ -9,4 +11,5 @@ public record CommentDto
    public DateTime Created { get; set; }
    public Guid? ParentId { get; set; }   
    public List<CommentDto> Replies { get; set; } = new List<CommentDto>();
+   public List<FileDto> Files { get; set; } = new List<FileDto>();
 }

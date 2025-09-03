@@ -23,6 +23,10 @@
 
     <ItemGroup>
       <Folder Include="Middleware\" />
+      <Folder Include="wwwroot\spa-client\src\app\core\services\" />
+      <Folder Include="wwwroot\spa-client\src\app\features\captcha\" />
+      <Folder Include="wwwroot\spa-client\src\app\features\comments\" />
+      <Folder Include="wwwroot\spa-client\src\app\shared\models\" />
     </ItemGroup>
 
 </Project>

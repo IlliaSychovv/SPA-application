@@ -20,14 +20,15 @@ public class AuthRepository : IAuthRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<User?> GetByIdAsync(Guid id)
-    {
-        return await _context.Users.FindAsync(id);
-    }
-
     public async Task<User?> GetByEmailAsync(string email)
     {
         return await _context.Users
             .FirstOrDefaultAsync(u => u.Email == email);
+    }
+
+    public async Task<User?> GetByUserNameAsync(string name)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.Name == name);
     }
 }
