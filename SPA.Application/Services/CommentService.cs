@@ -13,12 +13,15 @@ public class CommentService : ICommentService
     private readonly ICommentRepository _commentRepository;
     private readonly IAuthRepository _authRepository;
     private readonly IFileProcessingService _fileProcessingService;
+    private readonly IHtmlSanitizer _htmlSanitizer;
 
-    public CommentService(ICommentRepository repository, IAuthRepository authRepository, IFileProcessingService fileProcessingService)
+    public CommentService(ICommentRepository repository, IAuthRepository authRepository, 
+        IFileProcessingService fileProcessingService, IHtmlSanitizer htmlSanitizer)
     {
         _commentRepository = repository;
         _authRepository = authRepository;
         _fileProcessingService = fileProcessingService;
+        _htmlSanitizer = htmlSanitizer;
     }
 
     public async Task<CommentDto> CreateComment(CreateCommentDto dto)
@@ -41,6 +44,7 @@ public class CommentService : ICommentService
         comment.User = user;
         comment.UserId = user.Id;
         comment.Created = DateTime.Now;
+        comment.Text = _htmlSanitizer.SanitizeHtml(dto.Text);
         
         await _commentRepository.AddAsync(comment);
         return MapToCommentDto(comment);
@@ -74,7 +78,7 @@ public class CommentService : ICommentService
         reply.ParentId = parentId;
         reply.Created = DateTime.Now;
         
-        await _commentRepository.AddAsync(reply);
+        await _commentRepository.AddReplyAsync(parentId, reply);
         
         if (files != null && files.Any())
         {

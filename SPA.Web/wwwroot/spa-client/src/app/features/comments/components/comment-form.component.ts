@@ -1,47 +1,56 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { CaptchaComponent } from '../../captcha/components/captcha.component';
 import { CreateComment } from '../../../shared/models/comment.model';
+import { CustomValidators } from '../../../shared/validators/custom-validators';
+import { ValidationErrorComponent } from '../../../shared/components/validation-error.component';
 
 @Component({
   selector: 'app-comment-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, CaptchaComponent],
+  imports: [CommonModule, ReactiveFormsModule, CaptchaComponent, ValidationErrorComponent],
   template: `
     <div class="comment-form">
       <h3>Add a comment</h3>
-      <form (ngSubmit)="onSubmit()" #commentForm="ngForm">
+
+
+
+      <form [formGroup]="commentForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
           <label for="name">Name *</label>
           <input type="text"
                  id="name"
-                 name="name"
-                 [(ngModel)]="comment.name"
-                 required
+                 formControlName="name"
                  class="form-control"
-                 placeholder="Enter your name">
+                 [class]="getFieldCssClass(commentForm.get('name')!)"
+                 placeholder="Enter your name (Latin letters, numbers and spaces)">
+
+          <app-validation-error [control]="commentForm.get('name')"></app-validation-error>
         </div>
 
         <div class="form-group">
           <label for="email">Email *</label>
           <input type="email"
                  id="email"
-                 name="email"
-                 [(ngModel)]="comment.email"
-                 required
+                 formControlName="email"
                  class="form-control"
+                 [class]="getFieldCssClass(commentForm.get('email')!)"
                  placeholder="Enter your email">
+
+          <app-validation-error [control]="commentForm.get('email')"></app-validation-error>
         </div>
 
         <div class="form-group">
           <label for="homePage">Home page</label>
           <input type="url"
                  id="homePage"
-                 name="homePage"
-                 [(ngModel)]="comment.homePage"
+                 formControlName="homePage"
                  class="form-control"
+                 [class]="getFieldCssClass(commentForm.get('homePage')!)"
                  placeholder="https://example.com">
+
+          <app-validation-error [control]="commentForm.get('homePage')"></app-validation-error>
         </div>
 
         <div class="form-group">
@@ -82,13 +91,14 @@ import { CreateComment } from '../../../shared/models/comment.model';
           </div>
 
           <textarea id="text"
-                    name="text"
-                    [(ngModel)]="comment.text"
-                    required
+                    formControlName="text"
                     rows="4"
                     class="form-control"
+                    [class]="getFieldCssClass(commentForm.get('text')!)"
                     placeholder="Enter your comment"
                     [hidden]="showPreview"></textarea>
+
+          <app-validation-error [control]="commentForm.get('text')"></app-validation-error>
 
           <div class="preview-content"
                [hidden]="!showPreview"
@@ -105,11 +115,13 @@ import { CreateComment } from '../../../shared/models/comment.model';
           </div>
           <input type="file"
                  id="files"
-                 name="files"
+                 formControlName="files"
                  multiple
                  accept=".jpg,.jpeg,.png,.gif,.txt"
                  (change)="onFileSelect($event)"
                  class="form-control file-input">
+
+          <app-validation-error [control]="commentForm.get('files')"></app-validation-error>
 
           <div class="selected-files" *ngIf="selectedFiles.length > 0">
             <div class="file-item" *ngFor="let file of selectedFiles; let i = index">
@@ -127,9 +139,11 @@ import { CreateComment } from '../../../shared/models/comment.model';
 
         <app-captcha (captchaChange)="onCaptchaChange($event)"></app-captcha>
 
+        <app-validation-error [control]="commentForm.get('captcha')"></app-validation-error>
+
         <div class="form-actions">
           <button type="submit"
-                  [disabled]="!commentForm.valid || isSubmitting"
+                  [disabled]="commentForm.invalid || isSubmitting"
                   class="btn btn-primary">
             {{ isSubmitting ? 'Sending...' : 'Send' }}
           </button>
@@ -311,16 +325,14 @@ import { CreateComment } from '../../../shared/models/comment.model';
       border: 1px solid #ddd;
       border-radius: 4px;
       font-size: 1rem;
-      transition: border-color 0.2s;
     }
 
     .form-control:focus {
       outline: none;
       border-color: #007bff;
-      box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
     }
 
-    .form-control.ng-invalid.ng-touched {
+    .form-control.is-invalid {
       border-color: #dc3545;
     }
 
@@ -367,6 +379,19 @@ import { CreateComment } from '../../../shared/models/comment.model';
       background-color: #545b62;
     }
 
+
+
+    .error-message {
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      padding: 0.25rem 0;
+    }
+
+    .error-message div {
+      margin-bottom: 0.125rem;
+    }
+
     @media (max-width: 768px) {
       .html-toolbar {
         flex-direction: column;
@@ -380,30 +405,70 @@ import { CreateComment } from '../../../shared/models/comment.model';
     }
   `]
 })
-export class CommentFormComponent {
+export class CommentFormComponent implements OnInit {
   @Output() commentSubmit = new EventEmitter<CreateComment>();
   @Output() cancel = new EventEmitter<void>();
 
-  comment: CreateComment = {
-    name: '',
-    email: '',
-    homePage: '',
-    text: '',
-    captcha: '',
-    captchaSessionId: ''
-  };
+  commentForm: FormGroup;
 
   isSubmitting = false;
   showPreview = false;
   selectedFiles: File[] = [];
 
+  constructor(
+    private fb: FormBuilder
+  ) {
+    this.commentForm = this.fb.group({
+      name: ['', [
+        Validators.required,
+        Validators.maxLength(30),
+        CustomValidators.userNameFormat()
+      ]],
+      email: ['', [
+        Validators.required,
+        CustomValidators.emailFormat()
+      ]],
+      homePage: ['', [
+        CustomValidators.urlFormat()
+      ]],
+      text: ['', [
+        Validators.required,
+        Validators.minLength(1),
+        Validators.maxLength(2000),
+        CustomValidators.htmlContent()
+      ]],
+      files: [[]],
+      captcha: ['', [
+        CustomValidators.captchaRequired()
+      ]]
+    });
+
+    this.commentForm.valueChanges.subscribe(() => {
+    });
+  }
+
+  ngOnInit(): void {
+  }
+
   onSubmit(): void {
     if (this.isSubmitting) return;
 
+    this.markAllFieldsAsTouched();
+
+    if (this.commentForm.invalid) {
+      return;
+    }
+
     this.isSubmitting = true;
 
-     const commentWithFiles = {
-      ...this.comment,
+    const formValue = this.commentForm.value;
+    const commentWithFiles: CreateComment = {
+      name: formValue.name,
+      email: formValue.email,
+      homePage: formValue.homePage,
+      text: formValue.text,
+      captcha: formValue.captcha.input,
+      captchaSessionId: formValue.captcha.sessionId,
       files: this.selectedFiles
     };
 
@@ -415,11 +480,12 @@ export class CommentFormComponent {
   }
 
   onCaptchaChange(captchaData: {input: string, sessionId: string}): void {
-    this.comment.captcha = captchaData.input;
-    this.comment.captchaSessionId = captchaData.sessionId;
+    this.commentForm.patchValue({
+      captcha: captchaData
+    });
   }
 
-   onFileSelect(event: Event): void {
+  onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       const files = Array.from(input.files);
@@ -442,11 +508,19 @@ export class CommentFormComponent {
       });
 
       this.selectedFiles = [...this.selectedFiles, ...validFiles];
+
+      this.commentForm.patchValue({
+        files: this.selectedFiles
+      });
     }
   }
 
   removeFile(index: number): void {
     this.selectedFiles.splice(index, 1);
+
+    this.commentForm.patchValue({
+      files: this.selectedFiles
+    });
   }
 
   insertTag(tag: string, placeholder: string): void {
@@ -455,7 +529,8 @@ export class CommentFormComponent {
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const selectedText = this.comment.text.substring(start, end);
+    const currentText = this.commentForm.get('text')?.value || '';
+    const selectedText = currentText.substring(start, end);
 
     let insertText: string;
     if (selectedText) {
@@ -464,11 +539,13 @@ export class CommentFormComponent {
       insertText = `<${tag}>${placeholder}</${tag}>`;
     }
 
-    const newText = this.comment.text.substring(0, start) +
+    const newText = currentText.substring(0, start) +
                    insertText +
-                   this.comment.text.substring(end);
+                   currentText.substring(end);
 
-    this.comment.text = newText;
+    this.commentForm.patchValue({
+      text: newText
+    });
 
     setTimeout(() => {
       textarea.focus();
@@ -489,7 +566,8 @@ export class CommentFormComponent {
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const selectedText = this.comment.text.substring(start, end);
+    const currentText = this.commentForm.get('text')?.value || '';
+    const selectedText = currentText.substring(start, end);
 
     let insertText: string;
     if (selectedText) {
@@ -498,11 +576,13 @@ export class CommentFormComponent {
       insertText = `<a href="${url}" title="${url}">${text}</a>`;
     }
 
-    const newText = this.comment.text.substring(0, start) +
+    const newText = currentText.substring(0, start) +
                    insertText +
-                   this.comment.text.substring(end);
+                   currentText.substring(end);
 
-    this.comment.text = newText;
+    this.commentForm.patchValue({
+      text: newText
+    });
 
     setTimeout(() => {
       textarea.focus();
@@ -516,9 +596,10 @@ export class CommentFormComponent {
   }
 
   getPreviewHtml(): string {
-    if (!this.comment.text) return '';
+    const text = this.commentForm.get('text')?.value || '';
+    if (!text) return '';
 
-    let html = this.comment.text;
+    let html = text;
 
     html = html
       .replace(/&/g, '&amp;')
@@ -534,16 +615,29 @@ export class CommentFormComponent {
   }
 
   resetForm(): void {
-    this.comment = {
-      name: '',
-      email: '',
-      homePage: '',
-      text: '',
-      captcha: '',
-      captchaSessionId: ''
-    };
+    this.commentForm.reset();
     this.selectedFiles = [];
     this.showPreview = false;
     this.isSubmitting = false;
   }
+
+
+
+  getFieldCssClass(control: AbstractControl): string {
+    if (control.touched && control.invalid) {
+      return 'is-invalid';
+    }
+    return '';
+  }
+
+  private markAllFieldsAsTouched(): void {
+    Object.keys(this.commentForm.controls).forEach(key => {
+      const control = this.commentForm.get(key);
+      if (control) {
+        control.markAsTouched();
+      }
+    });
+  }
+
+
 }

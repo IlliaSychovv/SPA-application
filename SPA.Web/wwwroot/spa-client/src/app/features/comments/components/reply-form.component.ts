@@ -198,8 +198,7 @@ export class ReplyFormComponent {
 
   reply: CommentReply = {
     text: '',
-    name: '',
-    created: new Date()
+    name: ''
   };
 
   selectedFiles: File[] = [];
@@ -230,8 +229,7 @@ export class ReplyFormComponent {
   resetForm(): void {
     this.reply = {
       text: '',
-      name: '',
-      created: new Date()
+      name: ''
     };
     this.selectedFiles = [];
     this.isSubmitting = false;

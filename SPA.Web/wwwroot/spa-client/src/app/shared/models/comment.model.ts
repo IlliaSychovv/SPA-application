@@ -22,7 +22,6 @@ export interface CreateComment {
 export interface CommentReply {
   text: string;
   name: string;
-  created: Date;
 }
 
 export interface CommentReplyWithFiles {

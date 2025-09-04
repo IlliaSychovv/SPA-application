@@ -12,58 +12,52 @@ export interface LightboxImage {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="lightbox-overlay" 
+    <div class="lightbox-overlay"
          [class.visible]="isVisible"
          (click)="close()">
-      
-      <!-- Спиннер загрузки -->
+
       <div class="loading-spinner" *ngIf="isLoading">
         <div class="spinner"></div>
         <p>Loading...</p>
       </div>
-      
-      <!-- Контент -->
-      <div class="lightbox-content" 
+
+      <div class="lightbox-content"
            *ngIf="!isLoading && currentImage"
            (click)="$event.stopPropagation()">
-        
-        <!-- Изображение -->
+
         <img *ngIf="isImageFile(currentImage.src)"
-             [src]="currentImage.src" 
+             [src]="currentImage.src"
              [alt]="currentImage.alt || currentImage.title"
              (load)="onImageLoad()"
              (error)="onImageError()"
              class="lightbox-image"
              style="max-width: 100%; max-height: 80vh; object-fit: contain;">
-        
-        <!-- Текстовый файл -->
+
         <div *ngIf="isTextFile(currentImage.src)" class="text-content">
           <h3>{{ currentImage.title }}</h3>
           <div class="text-content-body">
             <p>Текстовый файл загружается...</p>
           </div>
         </div>
-        
-        <!-- Навигация -->
+
         <div class="lightbox-nav" *ngIf="images.length > 1">
-          <button class="nav-btn prev-btn" 
-                  (click)="previous()" 
+          <button class="nav-btn prev-btn"
+                  (click)="previous()"
                   [disabled]="currentIndex === 0">
             ‹
           </button>
-          
+
           <span class="counter">
             {{ currentIndex + 1 }} / {{ images.length }}
           </span>
-          
-          <button class="nav-btn next-btn" 
-                  (click)="next()" 
+
+          <button class="nav-btn next-btn"
+                  (click)="next()"
                   [disabled]="currentIndex === images.length - 1">
             ›
           </button>
         </div>
-        
-        <!-- Кнопка закрытия -->
+
         <button class="close-btn" (click)="close()">✕</button>
       </div>
     </div>
@@ -130,13 +124,13 @@ export interface LightboxImage {
     }
 
     @keyframes slideIn {
-      from { 
-        opacity: 0; 
-        transform: scale(0.8) translateY(20px); 
+      from {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
       }
-      to { 
-        opacity: 1; 
-        transform: scale(1) translateY(0); 
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
       }
     }
 
@@ -246,7 +240,7 @@ export interface LightboxImage {
       .lightbox-nav {
         padding: 0 1rem;
       }
-      
+
       .nav-btn {
         font-size: 1.5rem;
         padding: 0.75rem;
@@ -276,9 +270,8 @@ export class LightboxComponent implements OnInit {
   open(): void {
     this.isVisible = true;
     this.isLoading = true;
-    
-    // Автоматически скрываем спиннер через 5 секунд
-    this.loadTimeout = setTimeout(() => {
+
+     this.loadTimeout = setTimeout(() => {
       this.isLoading = false;
     }, 5000);
   }
@@ -297,9 +290,8 @@ export class LightboxComponent implements OnInit {
       this.currentIndex++;
       this.currentImage = this.images[this.currentIndex];
       this.isLoading = true;
-      
-      // Сбрасываем таймаут для нового изображения
-      if (this.loadTimeout) {
+
+       if (this.loadTimeout) {
         clearTimeout(this.loadTimeout);
       }
       this.loadTimeout = setTimeout(() => {
@@ -313,9 +305,8 @@ export class LightboxComponent implements OnInit {
       this.currentIndex--;
       this.currentImage = this.images[this.currentIndex];
       this.isLoading = true;
-      
-      // Сбрасываем таймаут для предыдущего изображения
-      if (this.loadTimeout) {
+
+       if (this.loadTimeout) {
         clearTimeout(this.loadTimeout);
       }
       this.loadTimeout = setTimeout(() => {
@@ -349,4 +340,4 @@ export class LightboxComponent implements OnInit {
     const extension = src.toLowerCase().split('.').pop();
     return extension === 'txt';
   }
-} 
+}

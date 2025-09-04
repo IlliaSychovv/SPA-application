@@ -1,7 +1,10 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using SPA.Application.Interfaces.Repository;
 using SPA.Application.Interfaces.Service;
 using SPA.Application.Services;
+using SPA.Application.Validators;
 using SPA.Infrastructure.Data;
 using SPA.Infrastructure.Repositories;
 using SPA.Infrastructure.Services;
@@ -11,6 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CommentReplyValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCommentValidator>();
 
 builder.Services.AddCors(options =>
 {
@@ -34,6 +41,7 @@ builder.Services.AddScoped<IImportService, ImportService>();
 builder.Services.AddScoped<IFileRepository, FileRepository>();
 builder.Services.AddScoped<IFileProcessingService, FileProcessingService>();
 builder.Services.AddScoped<ICaptchaService, CaptchaService>();
+builder.Services.AddScoped<IHtmlSanitizer, HtmlSanitizer>();
 builder.Services.AddMemoryCache();
 
 var app = builder.Build();

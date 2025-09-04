@@ -7,5 +7,5 @@ public record FileDto
     public string Path { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
     public long Size { get; set; }
-    public string SizeFormatted { get; set; } = string.Empty;
+    public string SizeFormatted { get; set; } = string.Empty; 
 }

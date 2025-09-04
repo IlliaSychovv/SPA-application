@@ -37,7 +37,7 @@ public class CommentRepository : ICommentRepository
                 .ThenInclude(r => r.Replies)
                 .ThenInclude(rr => rr.Files)
             .Where(c => c.ParentId == null);
-
+        
         if(!string.IsNullOrWhiteSpace(filterByUserName))
             query = query.Where(q => q.User.Name == filterByUserName);
     

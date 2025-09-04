@@ -40,7 +40,6 @@ export class CommentsService {
     const formData = new FormData();
     formData.append('text', reply.text);
     formData.append('name', reply.name);
-    formData.append('created', reply.created.toISOString());
 
     if (files) {
       files.forEach(file => {
